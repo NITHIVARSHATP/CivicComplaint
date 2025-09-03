@@ -16,19 +16,29 @@ Multi-Modal Input: Accepts complaints via text, OCR for image-based text, Voice-
 Role-Based Ecosystem: Provides tailored dashboards and interfaces for all users, including a mobile app for citizens, a specialized web portal for industries, and a multi-level dashboard for government officials.
 
 Tech Stack
+
 Category	Technology
+
 Frontend (Web)	React.js
+
 Frontend (Mobile)	Flutter
-Backend	Python 3, FastAPI
-Database	PostgreSQL with PostGIS extension
-AI - NLP	Hugging Face Transformers (BERT)
-AI - Vision/OCR	Ultralytics YOLOv8, OpenCV, Tesseract
+
+Backend	Python 3, FastAPI 
+Database	PostgreSQL with PostGIS extension 
+AI - NLP	Hugging Face Transformers (BERT) 
+AI - Vision/OCR	Ultralytics YOLOv8, OpenCV, Tesseract 
 AI - Audio	OpenAI's Whisper
+
 AI - Analytics	Scikit-learn (DBSCAN, TF-IDF)
+
 Automation	APScheduler (for Cron Jobs)
+
 Collaboration	Git & GitHub
+
 Getting Started
+
 Prerequisites
+
 Ensure you have the following installed on your local machine:
 
 Python 3.8+
