@@ -1,4 +1,5 @@
 AI-Powered Civic Complaint Management System
+
 ResolvAI is a unified, intelligent platform designed to modernize how cities handle civic complaints. It replaces slow, fragmented, and manual processes with a fast, automated, and accountable workflow that connects citizens, industries, and a multi-level government hierarchy on a single platform.
 
 Key Features
