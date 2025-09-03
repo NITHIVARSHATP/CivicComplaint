@@ -24,9 +24,13 @@ Frontend (Web)	React.js
 Frontend (Mobile)	Flutter
 
 Backend	Python 3, FastAPI 
+
 Database	PostgreSQL with PostGIS extension 
+
 AI - NLP	Hugging Face Transformers (BERT) 
+
 AI - Vision/OCR	Ultralytics YOLOv8, OpenCV, Tesseract 
+
 AI - Audio	OpenAI's Whisper
 
 AI - Analytics	Scikit-learn (DBSCAN, TF-IDF)
