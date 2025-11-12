@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:civic_management_system/models/complaint_model.dart';
-import 'package:civic_management_system/services/mock_api_service.dart';
+// removed mock service import and replaced with the real API
+import 'package:civic_management_system/services/official_dashboard_api.dart';
 import 'package:civic_management_system/complaint_card.dart';
 import 'package:civic_management_system/screens/login_screen.dart';
-
 
 class OfficialDashboardScreen extends StatefulWidget {
   const OfficialDashboardScreen({super.key});
@@ -14,11 +14,15 @@ class OfficialDashboardScreen extends StatefulWidget {
 
 class _OfficialDashboardScreenState extends State<OfficialDashboardScreen> {
   late Future<List<Complaint>> _complaintsFuture;
-  final MockApiService _apiService = MockApiService();
+  final OfficialDashboardApi _apiService = OfficialDashboardApi();
 
   @override
   void initState() {
     super.initState();
+    _loadComplaints();
+  }
+
+  void _loadComplaints() {
     _complaintsFuture = _apiService.getComplaintsForOfficial();
   }
 
@@ -52,11 +56,20 @@ class _OfficialDashboardScreenState extends State<OfficialDashboardScreen> {
           }
 
           final complaints = snapshot.data!;
-          return ListView.builder(
-            itemCount: complaints.length,
-            itemBuilder: (context, index) {
-              return ComplaintCard(complaint: complaints[index]);
+          return RefreshIndicator(
+            onRefresh: () async {
+              setState(() {
+                _loadComplaints();
+              });
+              // wait for future to complete before stopping indicator
+              await _complaintsFuture;
             },
+            child: ListView.builder(
+              itemCount: complaints.length,
+              itemBuilder: (context, index) {
+                return ComplaintCard(complaint: complaints[index]);
+              },
+            ),
           );
         },
       ),

@@ -1,37 +1,28 @@
 import 'package:flutter/material.dart';
-// This import assumes you have a file named 'login_screen.dart' inside a 'screens' folder.
-// Make sure you have created this file and the LoginScreen widget within it.
-import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
 
-// The main function is the entry point for all Flutter apps.
 void main() {
   runApp(const MyApp());
 }
 
-// MyApp is the root widget of your application.
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Civic Complaint System',
-      // The theme defines the visual appearance of your app.
+      title: 'Civic Complaint Management System',
       theme: ThemeData(
-        // The color scheme is based on a seed color, which automatically
-        // generates a harmonious palette.
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF4A148C), // A deep, professional purple
+          seedColor: const Color(0xFF4A148C),
           primary: const Color(0xFF4A148C),
-          secondary: const Color(0xFFF50057), // A vibrant pink for accents and buttons
-          background: const Color(0xFFF5F5F5), // A light grey for screen backgrounds
+          secondary: const Color(0xFFF50057),
+          background: const Color(0xFFF5F5F5),
         ),
         useMaterial3: true,
-
-        // Define a consistent theme for all AppBars in the app.
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF4A148C), // Primary purple color
-          foregroundColor: Colors.white, // Text and icon color
+          backgroundColor: Color(0xFF4A148C),
+          foregroundColor: Colors.white,
           elevation: 4,
           centerTitle: true,
           titleTextStyle: TextStyle(
@@ -40,12 +31,10 @@ class MyApp extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-
-        // Define a consistent theme for all ElevatedButtons.
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF4A148C), // Primary purple color
-            foregroundColor: Colors.white, // Text and icon color
+            backgroundColor: const Color(0xFF4A148C),
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
@@ -56,8 +45,6 @@ class MyApp extends StatelessWidget {
             ),
           ),
         ),
-
-        // Define a consistent look for all text input fields.
         inputDecorationTheme: InputDecorationTheme(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
@@ -66,11 +53,8 @@ class MyApp extends StatelessWidget {
           fillColor: Colors.white70,
         ),
       ),
-      // This hides the debug banner in the top-right corner.
       debugShowCheckedModeBanner: false,
-      // The 'home' property sets the first screen that is displayed.
-      home: const LoginScreen(),
+      home: const RegisterScreen(),
     );
   }
 }
-

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:civic_management_system/models/complaint_model.dart';
-import 'package:civic_management_system/services/mock_api_service.dart';
+// import mock service removed
+import 'package:civic_management_system/services/citizen_dashboard_api.dart';
 import 'package:civic_management_system/screens/add_complaint_screen.dart';
 import 'package:civic_management_system/complaint_card.dart';
 import 'package:civic_management_system/screens/login_screen.dart';
@@ -14,7 +15,8 @@ class CitizenDashboardScreen extends StatefulWidget {
 
 class _CitizenDashboardScreenState extends State<CitizenDashboardScreen> {
   late Future<List<Complaint>> _complaintsFuture;
-  final MockApiService _apiService = MockApiService();
+  // Use the new API service
+  final CitizenDashboardApi _apiService = CitizenDashboardApi();
 
   @override
   void initState() {
@@ -23,6 +25,7 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen> {
   }
 
   void _loadComplaints() {
+    // Keep same method name for minimal changes
     _complaintsFuture = _apiService.getComplaintsForCitizen();
   }
 
@@ -72,6 +75,8 @@ class _CitizenDashboardScreenState extends State<CitizenDashboardScreen> {
               setState(() {
                 _loadComplaints();
               });
+              // wait for the future to complete before stopping the indicator
+              await _complaintsFuture;
             },
             child: ListView.builder(
               itemCount: complaints.length,
