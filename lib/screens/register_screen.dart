@@ -154,10 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // --- LOGO PLACEHOLDER ---
-              // TODO: Add your logo to assets/images/logo.png and pubspec.yaml
-              // Then uncomment the line below and delete the Icon:
-              // Image.asset('assets/images/logo.png', height: 100),
+
               Icon(
                 Icons.business_outlined, // Placeholder Icon
                 size: 80,
