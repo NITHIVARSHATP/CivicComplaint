@@ -38,7 +38,8 @@ dependencies:
   intl: ^0.19.0
   cupertino_icons: ^1.0.8 # Standard package for iOS style icons.
   # Add this line
-  http: ^1.2.1  # Or another recent version
+  http: ^1.2.1  # Or another recent version'
+  shared_preferences: ^2.2.2
 
 
 

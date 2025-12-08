@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:civic_management_system/models/complaint_model.dart';
-
+import 'package:civic_management_system/config/global_config.dart';
 class OfficialDashboardApi {
   // default base URL points to Android emulator host; change to your real server as needed
-  final String baseUrl;
+  static final String baseUrl = GlobalConfig.baseUrl;
 
-  OfficialDashboardApi({this.baseUrl = 'http://10.0.2.2:8080/api'});
+  // The constructor no longer needs the baseUrl parameter
+  OfficialDashboardApi();
 
   /// Fetch complaints assigned to the official.
   /// Adjust the endpoint path to match your backend API.

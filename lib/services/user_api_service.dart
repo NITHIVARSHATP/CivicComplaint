@@ -1,22 +1,29 @@
 import 'dart:io';
 import 'dart:convert';
+import 'dart:typed_data'; // For handling byte arrays
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart'; // Import for basename
 import 'package:http_parser/http_parser.dart'; // Import for MediaType
+import 'package:civic_management_system/config/global_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class UserApiService {
-  // --- IMPORTANT ---
-  // Replace this with your actual backend server URL
-  // 10.0.2.2 is the special address for Android Emulator to access host's localhost
-  static const String _baseUrl = "http://10.0.2.2:8080/api/users";
+  static final String baseUrl = GlobalConfig.baseUrl;
+
+  // Base endpoint defined in Controller: @RequestMapping("/api/users")
+  static final String userEndpoint = "$baseUrl/users";
+
+
+
 
   /// Logs in a user.
-  /// Sends email and password as JSON and expects a JSON response.
+  /// Endpoint: POST /api/users/login
   static Future<http.Response> loginUser({
     required String email,
     required String password,
   }) async {
-    final Uri loginUri = Uri.parse("$_baseUrl/login");
+    print('LOGIN -> userEndpoint: $userEndpoint');
+    final Uri loginUri = Uri.parse("$userEndpoint/login");
 
     final String body = jsonEncode({
       'email': email,
@@ -28,57 +35,82 @@ class UserApiService {
         loginUri,
         headers: {"Content-Type": "application/json"},
         body: body,
-      ).timeout(const Duration(seconds: 10)); // Added timeout
+      ).timeout(const Duration(seconds: 10));
+      print('LOGIN -> status: ${response.statusCode}');
+      print('LOGIN -> body: ${response.body}');
 
+      try {
+        final parsed = jsonDecode(response.body);
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', jsonDecode(response.body)['id'].toString());
+
+        if (parsed is Map && parsed['error'] != null) {
+          print('LOGIN -> server error message: ${parsed['error']}');
+        }
+      } catch (_) {}
       return response;
     } catch (e) {
-      // Catch network errors, timeouts, etc.
-      // Return a custom response or rethrow
       return http.Response('Error: ${e.toString()}', 500);
     }
   }
 
   /// Registers a user without a photo (JSON only).
+  /// Endpoint: POST /api/users/register
   static Future<http.Response> registerUserJson({
     required String fullName,
     required String email,
     required String password,
     required String role,
+    int? departmentId, // Added to match DTO capabilities
   }) async {
-    final Uri registerUri = Uri.parse("$_baseUrl/register");
+    final Uri registerUri = Uri.parse("$userEndpoint/register");
 
-    final String body = jsonEncode({
+    final Map<String, dynamic> data = {
       'fullName': fullName,
       'email': email,
       'password': password,
       'role': role,
-    });
+    };
+
+    if (departmentId != null) {
+      data['departmentId'] = departmentId;
+    }
 
     try {
       final http.Response response = await http.post(
         registerUri,
         headers: {"Content-Type": "application/json"},
-        body: body,
-      ).timeout(const Duration(seconds: 10)); // Added timeout
-
+        body: jsonEncode(data),
+      ).timeout(const Duration(seconds: 10));
+      print('LOGIN -> status: ${response.statusCode}');
+      print('LOGIN -> body: ${response.body}');
+      try {
+        final parsed = jsonDecode(response.body);
+        if (parsed is Map && parsed['error'] != null) {
+          print('LOGIN -> server error message: ${parsed['error']}');
+        }
+      } catch (_) {}
       return response;
     } catch (e) {
+      print('Error: ${e.toString()}');
       return http.Response('Error: ${e.toString()}', 500);
     }
   }
 
-  /// Registers a user with a photo (Multipart request).
+  /// Registers a user with optional photo (Multipart request).
+  /// Endpoint: POST /api/users/register/photo
+  /// Matches Controller: @RequestPart(value = "photo", required = false)
   static Future<http.Response> registerUserWithPhoto({
     required String fullName,
     required String email,
     required String password,
     required String role,
-    required File photoFile,
+    String? departmentId, // Optional
+    File? photoFile,      // Optional
   }) async {
-    final Uri registerUri = Uri.parse("$_baseUrl/register/photo");
+    final Uri registerUri = Uri.parse("$userEndpoint/register/photo");
 
     try {
-      // Create a multipart request
       final http.MultipartRequest request = http.MultipartRequest('POST', registerUri);
 
       // Add text fields
@@ -87,23 +119,69 @@ class UserApiService {
       request.fields['password'] = password;
       request.fields['role'] = role;
 
-      // Add the file
-      final http.MultipartFile photo = await http.MultipartFile.fromPath(
-        'photo', // This 'photo' key must match your backend's expected field name
-        photoFile.path,
-        filename: basename(photoFile.path), // Uses path package
-        contentType: MediaType('image', 'jpeg'), // Example: set content type
-      );
-      request.files.add(photo);
+      if (departmentId != null && departmentId.isNotEmpty) {
+        request.fields['departmentId'] = departmentId;
+      }
 
-      // Send the request and get the response
-      final http.StreamedResponse streamedResponse = await request.send().timeout(const Duration(seconds: 30)); // Added timeout
+      // Add the file only if provided
+      if (photoFile != null) {
+        final http.MultipartFile photo = await http.MultipartFile.fromPath(
+          'photo',
+          photoFile.path,
+          filename: basename(photoFile.path),
+          // Note: In production, consider using the 'mime' package to determine exact type
+          contentType: MediaType('image', 'jpeg'),
+        );
+        request.files.add(photo);
+      }
 
-      // Convert StreamedResponse to http.Response
+      final http.StreamedResponse streamedResponse = await request.send().timeout(const Duration(seconds: 30));
       final http.Response response = await http.Response.fromStream(streamedResponse);
 
       return response;
 
+    } catch (e) {
+      return http.Response('Error: ${e.toString()}', 500);
+    }
+  }
+
+  /// Get user image bytes.
+  /// Endpoint: GET /api/users/{id}/image
+  /// Returns raw bytes. UI can use Image.memory(response.bodyBytes).
+  static Future<http.Response> getUserImage(int userId) async {
+    final Uri imageUri = Uri.parse("$userEndpoint/$userId/image");
+
+    try {
+      final http.Response response = await http.get(imageUri).timeout(const Duration(seconds: 10));
+      return response;
+    } catch (e) {
+      return http.Response('Error: ${e.toString()}', 500);
+    }
+  }
+
+  /// Upload or replace user image.
+  /// Endpoint: POST /api/users/{id}/image
+  static Future<http.Response> uploadUserImage({
+    required int userId,
+    required File photoFile,
+  }) async {
+    final Uri uploadUri = Uri.parse("$userEndpoint/$userId/image");
+
+    try {
+      final http.MultipartRequest request = http.MultipartRequest('POST', uploadUri);
+
+      final http.MultipartFile photo = await http.MultipartFile.fromPath(
+        'photo',
+        photoFile.path,
+        filename: basename(photoFile.path),
+        contentType: MediaType('image', 'jpeg'),
+      );
+      request.files.add(photo);
+
+      final http.StreamedResponse streamedResponse = await request.send().timeout(const Duration(seconds: 30));
+      final http.Response response = await http.Response.fromStream(streamedResponse);
+
+      return response;
     } catch (e) {
       return http.Response('Error: ${e.toString()}', 500);
     }
