@@ -55,6 +55,7 @@ class MyApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       home: const RegisterScreen(),
+      //home: CitizenDashboardScreen(),
     );
   }
 }
