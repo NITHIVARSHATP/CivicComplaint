@@ -1,17 +1,42 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from pydantic import BaseModel
-from backend.ai.ai_engine import classify_complaint
+from sqlalchemy.orm import Session
 
-app = FastAPI(title="Civic Complaint AI System")
+from backend.ai.ai_engine import classify_complaint
+from .database import SessionLocal
+from .models import ProcessedComplaint
+
+app = FastAPI(title="AI Complaint Backend")
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 class ComplaintRequest(BaseModel):
+    complaint_id: int
     text: str
 
 @app.get("/")
 def home():
-    return {"message": "Civic Complaint AI API is running 🚀"}
+    return {"message": "AI Complaint System Backend Running 🚀"}
 
-@app.post("/predict")
-def predict(data: ComplaintRequest):
+@app.post("/process")
+def process(data: ComplaintRequest, db: Session = Depends(get_db)):
     result = classify_complaint(data.text)
-    return result
+
+    entry = ProcessedComplaint(
+        complaint_id=data.complaint_id,
+        text=data.text,
+        category=result["predicted_category"],
+        priority=result["priority"],
+        confidence=result["confidence_score"]
+    )
+
+    db.add(entry)
+    db.commit()
+    db.refresh(entry)
+
+    return {"message": "Stored successfully", "id": entry.id, "result": result}
