@@ -85,6 +85,7 @@ class _AddComplaintScreenState extends State<AddComplaintScreen> {
     }
   }
 
+<<<<<<< Updated upstream
   Future<void> _submitComplaint() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -126,7 +127,43 @@ class _AddComplaintScreenState extends State<AddComplaintScreen> {
           _isLoading = false;
         });
       }
+=======
+  // This function is called when the user presses the "Submit Complaint" button.
+  void _submitComplaint() {
+    Future<void> _submitComplaint() async {
+  if (_formKey.currentState!.validate()) {
+    setState(() => _isLoading = true);
+
+    try {
+      // 1️⃣ Call AI model
+      final prediction = await ClassifierApi.classifyComplaint(_descriptionController.text);
+
+      // 2️⃣ Extract result
+      final category = prediction["predicted_category"];
+      final priority = prediction["priority"];
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("AI Classified → $category | Priority: $priority"),
+          backgroundColor: Colors.blueAccent,
+        ),
+      );
+
+      // TODO: 🔧 Store complaint using your backend API next (if exists)
+
+      setState(() => _isLoading = false);
+
+      Navigator.of(context).pop();
+
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text("Error: $e")));
+>>>>>>> Stashed changes
     }
+  }
+}
+
   }
 
   @override
